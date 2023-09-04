@@ -13,13 +13,11 @@
 // $connectionInfo = array("UID" => "sqladmin", "pwd" => "Fit5120*", "Database" => "sampledb", "LoginTimeout" => 30, "Encrypt" => 1, "TrustServerCertificate" => 0);
 // $serverName = "tcp:fit5120demo.database.windows.net,1433";
 // $conn = sqlsrv_connect($serverName, $connectionInfo);
+
 $con = mysqli_init();
-
-// mysqli_ssl_set($con,NULL,NULL, "{path to CA cert}", NULL, NULL);
-mysqli_real_connect($con, "fit5120demo2.mysql.database.azure.com", "sqladmin", "Fit5120*", "demo", 3306, MYSQLI_CLIENT_SSL);
-
-$energyconsumption = "SELECT * FROM `renew-summary-residential-community-data`";
-$check = mysqli_query($con, $energyconsumption) or die("2: query failed");
+mysqli_real_connect($con, "fit5120demo2.mysql.database.azure.com", "sqladmin", "Fit5120*", "demo", 3306);
+$garbarge_stats = "SELECT * FROM demo.annual_totals";
+$check = mysqli_query($con, $garbarge_stats) or die("2: query failed");
 
 // Create an array to store all the rows
 $rows = array();
@@ -36,12 +34,10 @@ if (count($rows) > 0) {
 $result = array("status" => "success", "data" => $rows);
 } else {
 // No rows found, still return an empty data array
-$result = array("status" => "error", "message" => "No data found in the 'Suburb' table.", "data" => $rows);
+$result = array("status" => "error", "message" => "No data found in the table.", "data" => $rows);
 }
 
 // Convert the result array to JSON and echo it
 echo json_encode($result);
 
-
 ?>
-

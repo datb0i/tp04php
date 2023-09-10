@@ -1,43 +1,48 @@
 <?php
-// // PHP Data Objects(PDO) Sample Code:
-// try {
-//     $conn = new PDO("sqlsrv:server = tcp:fit5120demo.database.windows.net,1433; Database = sampledb", "sqladmin", "Fit5120*");
-//     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-// }
-// catch (PDOException $e) {
-//     print("Error connecting to SQL Server.");
-//     die(print_r($e));
-// }
+// Fetch database connection details from environment variables
+$host = getenv('DB_HOST');
+$username = getenv('DB_USER');
+$password = getenv('DB_PASS');
+$database = getenv('DB_NAME');
+$port = 3306;
 
-// // SQL Server Extension Sample Code:
-// $connectionInfo = array("UID" => "sqladmin", "pwd" => "Fit5120*", "Database" => "sampledb", "LoginTimeout" => 30, "Encrypt" => 1, "TrustServerCertificate" => 0);
-// $serverName = "tcp:fit5120demo.database.windows.net,1433";
-// $conn = sqlsrv_connect($serverName, $connectionInfo);
-
+// Initialize connection
 $con = mysqli_init();
-mysqli_real_connect($con, "fit5120demo2.mysql.database.azure.com", "sqladmin", "Fit5120*", "demo", 3306);
-$garbarge_stats = "SELECT * FROM demo.annual_wastes";
-$check = mysqli_query($con, $garbarge_stats) or die("2: query failed");
 
-// Create an array to store all the rows
-$rows = array();
-
-// Loop through each row and fetch the data
-while ($row = mysqli_fetch_assoc($check)) {
-// Add each row to the array
-$rows[] = $row;
+// Connect to the database
+if (!mysqli_real_connect($con, $host, $username, $password, $database, $port)) {
+    echo json_encode(["status" => "error", "message" => "Connection failed: " . mysqli_connect_error()]);
+    exit();
 }
 
-// Check if any rows were found
-if (count($rows) > 0) {
-// Create an associative array to store the result
-$result = array("status" => "success", "data" => $rows);
-} else {
-// No rows found, still return an empty data array
-$result = array("status" => "error", "message" => "No data found in the table.", "data" => $rows);
+// Select data from 'demo.annual_wastes'
+$query_wastes = "SELECT * FROM demo.annual_wastes";
+$result_wastes = mysqli_query($con, $query_wastes);
+$rows_wastes = [];
+while ($row = mysqli_fetch_assoc($result_wastes)) {
+    $rows_wastes[] = $row;
 }
 
-// Convert the result array to JSON and echo it
-echo json_encode($result);
+// Select data from 'demo.annual_co2'
+$query_co2 = "SELECT * FROM demo.annual_co2";
+$result_co2 = mysqli_query($con, $query_co2);
+$rows_co2 = [];
+while ($row = mysqli_fetch_assoc($result_co2)) {
+    $rows_co2[] = $row;
+}
+
+// Prepare the response
+$response = [
+    "status" => "success",
+    "annual_wastes" => $rows_wastes,
+    "annual_co2" => $rows_co2
+];
+
+// Output the JSON response
+header('Content-Type: application/json');
+echo json_encode($response);
+
+// Close the database connection
+mysqli_close($con);
 
 ?>

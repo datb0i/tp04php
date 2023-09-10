@@ -1,9 +1,9 @@
 <?php
 // Fetch database connection details from environment variables
 $host = getenv('DB_HOST');
-$username = getenv('DB_USER');
-$password = getenv('DB_PASS');
-$database = getenv('DB_NAME');
+$username = getenv('DB_USERNAME');
+$password = getenv('DB_PASSWORD');
+$database = getenv('DB_DATABASE');
 $port = 3306;
 
 // Initialize connection

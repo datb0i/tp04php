@@ -16,7 +16,7 @@
 
 $con = mysqli_init();
 mysqli_real_connect($con, "fit5120demo2.mysql.database.azure.com", "sqladmin", "Fit5120*", "demo", 3306);
-$garbarge_stats = "SELECT * FROM demo.annual_totals";
+$garbarge_stats = "SELECT * FROM demo.annual_wastes";
 $check = mysqli_query($con, $garbarge_stats) or die("2: query failed");
 
 // Create an array to store all the rows

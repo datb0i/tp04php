@@ -42,8 +42,8 @@ if ($api_key == $api_key_post){
 
         $insert_stmt->close();
 
-    } elseif ($action == "update"){
-        $playername = filter_input(INPUT_POST, 'name', FILTER_SANITIZE_STRING);
+    } elseif ($action == "update_score"){
+        $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
         $score = filter_input(INPUT_POST, 'score', FILTER_VALIDATE_INT);
 
         // score was not a valid integer
@@ -53,15 +53,38 @@ if ($api_key == $api_key_post){
         }
 
         // Update the score only if it's higher than the current score
-        $update_stmt = $con->prepare("UPDATE demo.players SET score = ? WHERE playername = ? AND score < ?");
-        $update_stmt->bind_param("isi", $score, $playername, $score);
+        $update_stmt = $con->prepare("UPDATE demo.players SET score = ? WHERE id = ? AND score < ?");
+        $update_stmt->bind_param("iii", $score, $id, $score);
         $update_stmt->execute();
 
         // Check if any rows were affected
         if ($update_stmt->affected_rows > 0) {
             echo "Success! Score updated.";
         } else {
-            echo "Player name doesn't exist or the new score isn't higher!";
+            echo "ID doesn't exist or the new score isn't higher!";
+        }
+
+        $update_stmt->close();
+    } elseif ($action == "update_name"){
+        $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+        $playername = filter_input(INPUT_POST, 'playername', FILTER_VALIDATE_STRING);
+
+        // score was not a valid string
+        if ($playername === false) {
+            echo "Error processing request!";
+            exit();
+        }
+
+        // Update the score only if it's higher than the current score
+        $update_stmt = $con->prepare("UPDATE demo.players SET playername = ? WHERE id = ?");
+        $update_stmt->bind_param("si", $playername, $id);
+        $update_stmt->execute();
+
+        // Check if any rows were affected
+        if ($update_stmt->affected_rows > 0) {
+            echo "Success! Name updated.";
+        } else {
+            echo "ID doesn't exist";
         }
 
         $update_stmt->close();

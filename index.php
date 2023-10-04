@@ -35,8 +35,8 @@ while ($row = $result_co2->fetch_assoc()) {
     $rows_co2[] = $row;
 }
 
-// Select data from 'demo.score'
-$query_score = "SELECT * FROM demo.score ORDER BY score DESC";
+// Select data from 'demo.players'
+$query_score = "SELECT * FROM demo.players ORDER BY score DESC";
 $result_score = $con->query($query_score);
 $rows_score = [];
 while ($row = $result_score->fetch_assoc()) {

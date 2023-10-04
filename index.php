@@ -6,36 +6,45 @@ $password = getenv('DB_PASSWORD');
 $database = getenv('DB_DATABASE');
 $port = 3306;
 
-// Initialize connection
-$con = mysqli_init();
+// Create a new connection
+$con = new mysqli($host, $username, $password, $database, $port);
 
-// Connect to the database
-if (!mysqli_real_connect($con, $host, $username, $password, $database, $port)) {
-    echo json_encode(["status" => "error", "message" => "Connection failed: " . mysqli_connect_error()]);
+// Check connection
+if ($con->connect_error) {
+    echo json_encode(["status" => "error", "message" => "Connection failed: " . $con->connect_error]);
     exit();
 }
 
 // Select data from 'demo.annual_wastes'
 $query_wastes = "SELECT * FROM demo.annual_wastes";
-$result_wastes = mysqli_query($con, $query_wastes);
+$result_wastes = $con->query($query_wastes);
 $rows_wastes = [];
-while ($row = mysqli_fetch_assoc($result_wastes)) {
+while ($row = $result_wastes->fetch_assoc()) {
     $rows_wastes[] = $row;
 }
 
 // Select data from 'demo.annual_co2'
 $query_co2 = "SELECT * FROM demo.annual_co2";
-$result_co2 = mysqli_query($con, $query_co2);
+$result_co2 = $con->query($query_co2);
 $rows_co2 = [];
-while ($row = mysqli_fetch_assoc($result_co2)) {
+while ($row = $result_co2->fetch_assoc()) {
     $rows_co2[] = $row;
+}
+
+// Select data from 'demo.score'
+$query_score = "SELECT * FROM demo.score ORDER BY score DESC";
+$result_score = $con->query($query_score);
+$rows_score = [];
+while ($row = $result_score->fetch_assoc()) {
+    $rows_score[] = $row;
 }
 
 // Prepare the response
 $response = [
     "status" => "success",
     "annual_wastes" => $rows_wastes,
-    "annual_co2" => $rows_co2
+    "annual_co2" => $rows_co2,
+    "score" => $rows_score
 ];
 
 // Output the JSON response
@@ -43,6 +52,5 @@ header('Content-Type: application/json');
 echo json_encode($response);
 
 // Close the database connection
-mysqli_close($con);
-
+$con->close();
 ?>

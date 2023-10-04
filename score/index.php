@@ -1,48 +1,75 @@
 <?php
-// Fetch database connection details from environment variables
-$host = getenv('DB_HOST');
-$username = getenv('DB_USERNAME');
-$password = getenv('DB_PASSWORD');
-$database = getenv('DB_DATABASE');
-$port = 3306;
+// Retrieve API key from Unity
+$api_key = getenv('API_KEY');
+$api_key_post = filter_input(INPUT_POST, 'api_key', FILTER_SANITIZE_STRING);
 
-// Initialize connection
-$con = mysqli_init();
+if ($api_key == $api_key_post){
 
-// Connect to the database
-if (!mysqli_real_connect($con, $host, $username, $password, $database, $port)) {
-    echo json_encode(["status" => "error", "message" => "Connection failed: " . mysqli_connect_error()]);
+    // Fetch database connection details from environment variables
+    $host = getenv('DB_HOST');
+    $username = getenv('DB_USERNAME');
+    $password = getenv('DB_PASSWORD');
+    $database = getenv('DB_DATABASE');
+    $port = 3306;
+
+
+    // Initialize connection
+    $con = mysqli_init();
+
+    // Connect to the database
+    if (!mysqli_real_connect($con, $host, $username, $password, $database, $port)) {
+        echo json_encode(["status" => "error", "message" => "Connection failed: " . mysqli_connect_error()]);
+        exit();
+    }
+
+    // Retrieve Action data from Unity
+    $action = filter_input(INPUT_POST, 'action', FILTER_SANITIZE_STRING);
+
+    if ($action == "create"){
+        $playername = filter_input(INPUT_POST, 'name', FILTER_SANITIZE_STRING);
+        $score = 0;
+
+        $insert_stmt = $con->prepare("INSERT INTO demo.players (playername, score) VALUES (?, ?)");
+        $insert_stmt->bind_param("si", $playername, $score); 
+
+        if ($insert_stmt->execute()) {
+            $last_id = $con->insert_id;
+            echo $last_id;
+        } else {
+            // Catching any error during the insertion. 
+            echo "Database error: " . $con->error;
+        }
+
+        $insert_stmt->close();
+
+    } elseif ($action == "update"){
+        $playername = filter_input(INPUT_POST, 'name', FILTER_SANITIZE_STRING);
+        $score = filter_input(INPUT_POST, 'score', FILTER_VALIDATE_INT);
+
+        // score was not a valid integer
+        if ($score === false) {
+            echo "Error processing request!";
+            exit();
+        }
+
+        // Update the score only if it's higher than the current score
+        $update_stmt = $con->prepare("UPDATE demo.players SET score = ? WHERE playername = ? AND score < ?");
+        $update_stmt->bind_param("isi", $score, $playername, $score);
+        $update_stmt->execute();
+
+        // Check if any rows were affected
+        if ($update_stmt->affected_rows > 0) {
+            echo "Success! Score updated.";
+        } else {
+            echo "Player name doesn't exist or the new score isn't higher!";
+        }
+
+        $update_stmt->close();
+    }
+    $con->close();
+    
+} else {
+    echo json_encode(["status" => "error", "message" => "Invalid API key"]);
     exit();
 }
-
-// Select data from 'demo.annual_wastes'
-$query_wastes = "SELECT * FROM demo.annual_wastes";
-$result_wastes = mysqli_query($con, $query_wastes);
-$rows_wastes = [];
-while ($row = mysqli_fetch_assoc($result_wastes)) {
-    $rows_wastes[] = $row;
-}
-
-// Select data from 'demo.annual_co2'
-$query_co2 = "SELECT * FROM demo.annual_co2";
-$result_co2 = mysqli_query($con, $query_co2);
-$rows_co2 = [];
-while ($row = mysqli_fetch_assoc($result_co2)) {
-    $rows_co2[] = $row;
-}
-
-// Prepare the response
-$response = [
-    "status" => "success",
-    "annual_wastes" => $rows_wastes,
-    "annual_co2" => $rows_co2
-];
-
-// Output the JSON response
-header('Content-Type: application/json');
-echo json_encode($response);
-
-// Close the database connection
-mysqli_close($con);
-
 ?>

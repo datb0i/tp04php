@@ -69,7 +69,13 @@ if ($api_key == $api_key_post){
         $update_stmt->close();
     } elseif ($action == "update_name"){
         $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
-        $playername = filter_input(INPUT_POST, 'name', FILTER_VALIDATE_STRING);
+        $playername = filter_input(INPUT_POST, 'name', FILTER_SANITIZE_STRING);
+
+        // name was not a valid string
+        if ($playername === false) {
+            echo "Error processing request!";
+            exit();
+        }
 
         // Update the score only if it's higher than the current score
         $update_stmt = $con->prepare("UPDATE demo.players SET playername = ? WHERE id = ?");

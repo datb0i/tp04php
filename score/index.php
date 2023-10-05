@@ -1,12 +1,13 @@
 <?php
-
 header("Access-Control-Allow-Origin: *");
+
+$rawData = file_get_contents('php://input');
 // Retrieve API key from Unity
 $api_key = getenv('API_KEY');
 $api_key_post = $_POST['api_key'];
 
 echo "Stored API Key: " . $api_key . "<br>";
-echo "Received API Key: " . $api_key_post . "<br>";
+echo "Received API Key: " . $rawData . "<br>";
 
 if ($api_key == $api_key_post){
 

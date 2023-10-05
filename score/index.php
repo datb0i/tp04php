@@ -3,6 +3,9 @@
 $api_key = getenv('API_KEY');
 $api_key_post = filter_input(INPUT_POST, 'api_key', FILTER_SANITIZE_STRING);
 
+echo "Stored API Key: " . $api_key . "<br>";
+echo "Received API Key: " . $api_key_post . "<br>";
+
 if ($api_key == $api_key_post){
 
     // Fetch database connection details from environment variables

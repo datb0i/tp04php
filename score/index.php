@@ -1,7 +1,5 @@
 <?php
 // Retrieve API key from Unity
-file_put_contents('request.log', print_r($_POST, true));
-
 $api_key = getenv('API_KEY');
 $api_key_post = $_POST['api_key'];
 

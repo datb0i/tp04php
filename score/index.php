@@ -1,4 +1,6 @@
 <?php
+
+header("Access-Control-Allow-Origin: *");
 // Retrieve API key from Unity
 $api_key = getenv('API_KEY');
 $api_key_post = $_POST['api_key'];

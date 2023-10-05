@@ -69,7 +69,7 @@ if ($api_key == $api_key_post){
         $update_stmt->close();
     } elseif ($action == "update_name"){
         $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
-        $playername = filter_input(INPUT_POST, 'playername', FILTER_VALIDATE_STRING);
+        $playername = filter_input(INPUT_POST, 'name', FILTER_VALIDATE_STRING);
 
         // score was not a valid string
         if ($playername === false) {
